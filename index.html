@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+.taskCreate {
+	text-align: center;
+}
+.taskEle {
+	float: left;
+	width: 25%;
+}
+.clearfix {
+	clear :both;
+}
+.report {
+	margin-top: 40px;
+	text-align: center;
+}
+.taskList{
+	list-style: none;
+	float: left;
+	width: 30%;
+	padding : 10px;
+}
+.taskList li {
+	padding-top : 15px;
+	cursor: pointer;
+}
+.title label {
+	padding : 10px;
+	font-weight : bold;
+	float: left;
+	width: 30%;
+}
+</style>
+<script type="text/javascript">
+	var globalData = {};
+	function allowDrop(ev) {
+		    ev.preventDefault();
+		}
+
+		function drag(ev) {
+		    ev.dataTransfer.setData("text", ev.target.id);
+		}
+
+		function drop(ev) {
+			globalData.status =  ev.target.getAttribute('data-status');
+		    localStorage.setItem(globalData.currentTask, globalData.status);
+		    ev.preventDefault();
+		    var data = ev.dataTransfer.getData("text");
+		    ev.target.appendChild(document.getElementById(data));
+
+		}
+</script>
+</head>
+<body>
+<section>
+	<div class="taskCreate">
+		<h1>Create Task</h1>
+		<form>
+			<div class="taskEle">
+				<label>Task Name</label>
+				<input type="text" name="taskName" id="taskName">
+			</div>
+
+			<div class="taskEle">
+				<label>Task Status</label>
+				<select id="taskStatus" name="taskStatus">
+					<option value="Pending">Pending</option>
+					<option value="Inprogress">Inprogress</option>
+					<option value="Completed">Completed</option>
+				</select>
+			</div>
+
+			<div class="taskEle">
+				<label>Task Description</label>
+				<input type="text" name="taskDescription" id="taskDescription">
+			</div>
+
+			<div class="taskEle">
+				<input type="button" name="submit" value="Create Task" id="createTask">
+			</div>
+			<div class="clearfix"></div>
+		</form>
+	</div>
+
+	<div class="report">
+		<h1>Task Report</h1>
+		<div class="title">
+			<label>Pending Task</label>
+			<label>Inprocess Task</label>
+			<label>Complete Task</label>
+			<div class="clearfix"></div>
+		</div>
+		<div>
+			<ul id="taskListPending" class="taskList" ondrop="drop(event)" ondragover="allowDrop(event)" data-status="Pending"></ul>
+			<ul id="taskListInprogress" class="taskList" ondrop="drop(event)" ondragover="allowDrop(event)"  data-status="Inprogress"></ul>
+			<ul id="taskListCompleted" class="taskList" ondrop="drop(event)" ondragover="allowDrop(event)"  data-status="Completed"></ul>
+			<div class="clearfix"></div>
+		</div>
+		<div class="clearfix"></div>
+	</div>
+</section>
+
+<script type="text/javascript">
+	(function(){
+
+		function createElement(element, className, id, insertId, itemNumber) {
+			var para = document.createElement(element);
+			para.className = className;
+			para.appendChild(document.createTextNode(localStorage.getItem('taskName'+itemNumber)));
+			para.appendChild(document.createTextNode(", " +localStorage.getItem('taskDescription'+itemNumber)));
+			// para.appendChild(document.createTextNode(", " +localStorage.getItem('taskStatus'+itemNumber)));
+
+			switch(localStorage.getItem('taskStatus'+itemNumber)) {
+				case "Pending":
+					insertId = insertId+"Pending";
+					break;
+				case "Inprogress":
+					insertId = insertId+"Inprogress";
+					break;
+				case "Completed":
+					insertId = insertId+"Completed";
+					break;
+			}
+			id && para.setAttribute('id', id);
+			para.setAttribute('draggable', true);
+			para.setAttribute('seq', itemNumber);
+
+			var element = document.getElementById(insertId);
+			element.appendChild(para);
+			document.getElementById(id).addEventListener("dragstart", function(event) {
+				drag(event);
+				globalData.currentTask = 'taskStatus'+this.getAttribute('seq');
+
+			});
+
+		}
+
+		function printList() {
+			var i = 0;
+			for (i = 0; i < localStorage.length/3; i++) {
+				createElement('li', 'taskList'+i, 'taskList'+i, 'taskList', i);
+			}
+		}
+
+		var objPrintList = new printList();
+
+		var itemLength = localStorage.length/3 || 0;
+		document.getElementById("createTask").addEventListener("click", function(){
+		    localStorage.setItem('taskName'+parseInt(itemLength), document.getElementById("taskName").value);
+		    localStorage.setItem('taskStatus'+parseInt(itemLength), document.getElementById("taskStatus").value);
+		    localStorage.setItem('taskDescription'+parseInt(itemLength), document.getElementById("taskDescription").value);
+		    createElement('li', 'taskList'+itemLength, 'taskList'+itemLength, 'taskList', itemLength);
+				itemLength++;
+		});
+
+
+
+	})();
+</script>
+
+</body>
+</html>
